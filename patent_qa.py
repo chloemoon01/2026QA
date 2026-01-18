@@ -6,6 +6,14 @@ from openai import OpenAI
 import json
 from datetime import datetime
 
+# 압축해제
+import zipfile, os
+
+if not os.path.exists("final_patent_chunking_results.json"):
+    with zipfile.ZipFile("data.zip", "r") as z:
+        z.extractall(".")
+
+
 # OpenAI API 설정
 import os
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
@@ -388,4 +396,5 @@ if __name__ == "__main__":
     # ]
     # results = chatbot.batch_process(questions, max_patents=3)
     
+
 
