@@ -4,3 +4,4 @@ scikit-learn
 torch
 transformers
 sentence-transformers
+openai
