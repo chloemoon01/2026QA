@@ -43,13 +43,21 @@ st.markdown("""
     
     /* Streamlit 기본 패딩 제거 */
     .block-container {
-        padding-top: 5rem !important;
+        padding-top: 6rem !important;
         padding-bottom: 1rem !important;
         max-width: 900px !important;
     }
     
     /* Streamlit 기본 요소 숨기기 */
-    header {
+    header[data-testid="stHeader"] {
+        display: none;
+    }
+    
+    #MainMenu {
+        visibility: hidden;
+    }
+    
+    footer {
         visibility: hidden;
     }
     
@@ -266,7 +274,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # -------------------------------
-# 헤더
+# 헤더 (HTML로 직접 삽입)
 # -------------------------------
 st.markdown("""
 <div class="chat-header">
@@ -278,6 +286,9 @@ st.markdown("""
     </div>
 </div>
 """, unsafe_allow_html=True)
+
+# 헤더 공간 확보
+st.markdown("<div style='height: 5rem;'></div>", unsafe_allow_html=True)
 
 # -------------------------------
 # 챗봇 로딩 (1회)
@@ -292,11 +303,15 @@ chatbot = load_chatbot()
 # 세션 상태 초기화
 # -------------------------------
 if "messages" not in st.session_state:
-    st.session_state.messages = [{
+    st.session_state.messages = []
+
+# 초기 메시지가 없으면 추가 (환영 메시지)
+if len(st.session_state.messages) == 0:
+    st.session_state.messages.append({
         "role": "assistant",
         "content": "안녕하세요! 특허 QA 시스템입니다. 특허에 관한 질문을 자유롭게 입력해주세요.",
         "timestamp": datetime.now().strftime("%H:%M")
-    }]
+    })
 
 # -------------------------------
 # 기존 대화 출력 (iMessage 스타일)
@@ -306,9 +321,7 @@ for msg in st.session_state.messages:
         # 사용자 메시지 (우측 파란 말풍선)
         st.markdown(f"""
         <div class="user-message-wrapper">
-            <div>
-                <div class="user-message">{msg["content"]}</div>
-            </div>
+            <div class="user-message">{msg["content"]}</div>
         </div>
         """, unsafe_allow_html=True)
     else:
@@ -329,7 +342,7 @@ for msg in st.session_state.messages:
                     <line x1="16" y1="16" x2="16" y2="16"/>
                 </svg>
             </div>
-            <div>
+            <div style="flex: 1;">
                 <div class="assistant-message">{msg["content"]}</div>
                 {meta_html}
             </div>
@@ -389,9 +402,5 @@ with st.sidebar:
     st.markdown("### ⚙️ 설정")
     
     if st.button("🗑️ 대화 내역 초기화", use_container_width=True):
-        st.session_state.messages = [{
-            "role": "assistant",
-            "content": "안녕하세요! 특허 QA 시스템입니다. 특허에 관한 질문을 자유롭게 입력해주세요.",
-            "timestamp": datetime.now().strftime("%H:%M")
-        }]
+        st.session_state.messages = []
         st.rerun()
