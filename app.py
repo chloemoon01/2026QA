@@ -1,17 +1,21 @@
 import streamlit as st
 import json
-from patent_qa import PatentQAChatbot  # 기존 코드 파일명 기준
+from patent_qa import PatentQAChatbot
 from datetime import datetime
 import os
 import requests
 
-JSON_URL = "https://drive.google.com/file/d/1rlB_4MrzZLFXrwHgPbOQge7bDdinwyKl/view?usp=drive_link"
+# -------------------------------
+# JSON 다운로드 설정
+# -------------------------------
+JSON_URL = "https://drive.google.com/uc?id=1rlB_4MrzZLFXrwHgPbOQge7bDdinwyKl"
 JSON_PATH = "final_patent_chunking_results.json"
 
 def download_json():
     if not os.path.exists(JSON_PATH):
         st.info("📥 특허 데이터 로딩 중입니다. 잠시만 기다려주세요...")
         r = requests.get(JSON_URL)
+        r.raise_for_status()
         with open(JSON_PATH, "wb") as f:
             f.write(r.content)
 
@@ -26,40 +30,28 @@ st.set_page_config(
 )
 
 # -------------------------------
-# 스타일 (파란색, 좌우 채팅)
+# 스타일
 # -------------------------------
 st.markdown("""
 <style>
 body {
     background-color: #f5f8fc;
 }
-
-.chat-container {
-    max-width: 900px;
-    margin: auto;
-}
-
-.user-msg {
+.stChatMessage.user {
     background-color: #1f77b4;
     color: white;
-    padding: 12px;
     border-radius: 12px;
-    margin: 10px 0;
-    text-align: right;
+    padding: 12px;
 }
-
-.bot-msg {
+.stChatMessage.assistant {
     background-color: #e3ecf7;
-    color: black;
-    padding: 12px;
     border-radius: 12px;
-    margin: 10px 0;
-    text-align: left;
+    padding: 12px;
 }
-
 .meta {
     font-size: 0.8em;
     color: #666;
+    margin-top: 6px;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -67,7 +59,7 @@ body {
 # -------------------------------
 # 제목
 # -------------------------------
-st.title("🔍 특허 질의응답 시스템")
+st.title("특허 질의응답 시스템")
 st.caption("청킹 전략 기반 · 다중 특허 문서 참조 QA")
 
 # -------------------------------
@@ -75,57 +67,58 @@ st.caption("청킹 전략 기반 · 다중 특허 문서 참조 QA")
 # -------------------------------
 @st.cache_resource
 def load_chatbot():
-    return PatentQAChatbot("final_patent_chunking_results.json")
-
+    return PatentQAChatbot(JSON_PATH)
 
 chatbot = load_chatbot()
 
 # -------------------------------
 # 세션 상태 초기화
 # -------------------------------
-if "chat_history" not in st.session_state:
-    st.session_state.chat_history = []
+if "messages" not in st.session_state:
+    st.session_state.messages = []
 
 # -------------------------------
-# 질문 입력
+# 기존 대화 출력 (위)
 # -------------------------------
-question = st.text_input("질문을 입력하세요", placeholder="예: 이 기술의 주요 장점은 무엇인가요?")
+for msg in st.session_state.messages:
+    with st.chat_message(msg["role"]):
+        st.markdown(msg["content"])
+        if msg["role"] == "assistant" and "patents" in msg:
+            st.markdown(
+                f"<div class='meta'>참조 출원번호: {', '.join(msg['patents'])}</div>",
+                unsafe_allow_html=True
+            )
 
-if st.button("질문하기") and question.strip():
-    result = chatbot.ask(question, verbose=False, max_patents=3)
-    
-    st.session_state.chat_history.append({
-        "question": question,
-        "answer": result["answer"],
-        "patents": result["application_numbers"],
-        "time": datetime.now().strftime("%Y-%m-%d %H:%M")
+# -------------------------------
+# 질문 입력 (항상 맨 아래)
+# -------------------------------
+user_input = st.chat_input("질문을 입력하세요 (예: 이 기술의 주요 장점은 무엇인가요?)")
+
+if user_input:
+    # 사용자 질문 저장
+    st.session_state.messages.append({
+        "role": "user",
+        "content": user_input
     })
 
-# -------------------------------
-# 채팅 히스토리 출력
-# -------------------------------
-st.markdown('<div class="chat-container">', unsafe_allow_html=True)
+    # 답변 생성
+    with st.spinner("🤖 답변 생성 중..."):
+        result = chatbot.ask(user_input, verbose=False, max_patents=3)
 
-for chat in st.session_state.chat_history:
-    st.markdown(f"""
-    <div class="user-msg">
-        {chat['question']}
-    </div>
-    """, unsafe_allow_html=True)
+    # 챗봇 답변 저장
+    st.session_state.messages.append({
+        "role": "assistant",
+        "content": result["answer"],
+        "patents": result["application_numbers"]
+    })
 
-    st.markdown(f"""
-    <div class="bot-msg">
-        {chat['answer']}
-        <div class="meta">참조 출원번호: {", ".join(chat['patents'])}</div>
-    </div>
-    """, unsafe_allow_html=True)
-
-st.markdown('</div>', unsafe_allow_html=True)
+    # 즉시 화면 갱신 (입력창 비우기)
+    st.rerun()
 
 # -------------------------------
-# 간단한 시각화 (신뢰도용)
+# 요약 정보
 # -------------------------------
-if st.session_state.chat_history:
-    st.subheader("📊 응답 정보 요약")
-    st.write(f"총 질문 수: {len(st.session_state.chat_history)}")
-
+if st.session_state.messages:
+    st.divider()
+    st.subheader("📊 응답 요약")
+    st.write(f"총 질문 수: {len([m for m in st.session_state.messages if m['role']=='user'])}")
