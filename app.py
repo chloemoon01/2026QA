@@ -26,41 +26,224 @@ download_json()
 # -------------------------------
 st.set_page_config(
     page_title="Patent QA Chatbot",
+    page_icon="💬",
     layout="wide"
 )
 
 # -------------------------------
-# 스타일
+# iMessage 스타일 CSS
 # -------------------------------
 st.markdown("""
 <style>
-body {
-    background-color: #f5f8fc;
-}
-.stChatMessage.user {
-    background-color: #1f77b4;
-    color: white;
-    border-radius: 12px;
-    padding: 12px;
-}
-.stChatMessage.assistant {
-    background-color: #e3ecf7;
-    border-radius: 12px;
-    padding: 12px;
-}
-.meta {
-    font-size: 0.8em;
-    color: #666;
-    margin-top: 6px;
-}
+    /* 전체 배경 */
+    .main {
+        background: linear-gradient(135deg, #f0f4f8 0%, #e8f0f8 50%, #f0f4f8 100%);
+        padding: 0 !important;
+    }
+    
+    /* Streamlit 기본 패딩 제거 */
+    .block-container {
+        padding-top: 2rem !important;
+        padding-bottom: 1rem !important;
+        max-width: 900px !important;
+    }
+    
+    /* 헤더 영역 */
+    .chat-header {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+        padding: 1rem 1.5rem;
+        margin: -2rem -1rem 1.5rem -1rem;
+        border-radius: 0;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+    
+    .chat-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #1a1a1a;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .chat-subtitle {
+        font-size: 0.85rem;
+        color: #86868b;
+        margin-top: 0.25rem;
+    }
+    
+    /* 채팅 메시지 컨테이너 */
+    .stChatMessage {
+        background: transparent !important;
+        padding: 0.5rem 0 !important;
+        border: none !important;
+    }
+    
+    /* 사용자 메시지 (우측) */
+    div[data-testid="stChatMessageContent"] {
+        padding: 0 !important;
+        background: transparent !important;
+    }
+    
+    /* 메시지 말풍선 스타일 */
+    .user-message-wrapper {
+        display: flex;
+        justify-content: flex-end;
+        margin: 0.5rem 0;
+    }
+    
+    .user-message {
+        background: linear-gradient(135deg, #007AFF 0%, #0051D5 100%);
+        color: white;
+        padding: 0.75rem 1rem;
+        border-radius: 18px;
+        border-bottom-right-radius: 4px;
+        max-width: 70%;
+        word-wrap: break-word;
+        box-shadow: 0 1px 2px rgba(0, 122, 255, 0.2);
+        font-size: 0.95rem;
+        line-height: 1.4;
+    }
+    
+    .assistant-message-wrapper {
+        display: flex;
+        justify-content: flex-start;
+        margin: 0.5rem 0;
+    }
+    
+    .assistant-message {
+        background: white;
+        color: #1a1a1a;
+        padding: 0.75rem 1rem;
+        border-radius: 18px;
+        border-bottom-left-radius: 4px;
+        max-width: 75%;
+        word-wrap: break-word;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+        font-size: 0.95rem;
+        line-height: 1.5;
+    }
+    
+    /* 타임스탬프 */
+    .message-time {
+        font-size: 0.75rem;
+        color: #86868b;
+        margin-top: 0.25rem;
+        padding: 0 0.5rem;
+    }
+    
+    .user-time {
+        text-align: right;
+    }
+    
+    .assistant-time {
+        text-align: left;
+    }
+    
+    /* 메타 정보 (참조 특허) */
+    .patent-meta {
+        font-size: 0.8rem;
+        color: #86868b;
+        background: rgba(0, 0, 0, 0.03);
+        padding: 0.5rem 0.75rem;
+        border-radius: 12px;
+        margin-top: 0.5rem;
+        border-left: 3px solid #007AFF;
+    }
+    
+    /* 입력창 스타일 */
+    .stChatInputContainer {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border-top: 1px solid rgba(0, 0, 0, 0.08);
+        padding: 1rem !important;
+        position: sticky;
+        bottom: 0;
+        z-index: 100;
+    }
+    
+    .stChatInput input {
+        background: white !important;
+        border: 1px solid #d1d1d6 !important;
+        border-radius: 20px !important;
+        padding: 0.75rem 1rem !important;
+        font-size: 0.95rem !important;
+    }
+    
+    .stChatInput input:focus {
+        border-color: #007AFF !important;
+        box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1) !important;
+    }
+    
+    /* 스피너 */
+    .stSpinner > div {
+        border-top-color: #007AFF !important;
+    }
+    
+    /* 구분선 */
+    hr {
+        border: none;
+        border-top: 1px solid rgba(0, 0, 0, 0.08);
+        margin: 1.5rem 0;
+    }
+    
+    /* 요약 정보 */
+    .summary-box {
+        background: white;
+        border-radius: 12px;
+        padding: 1rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+        margin-top: 1rem;
+    }
+    
+    /* Streamlit 기본 채팅 아바타 숨기기 */
+    .stChatMessage img {
+        display: none !important;
+    }
+    
+    /* 상태 표시 */
+    .status-indicator {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        font-size: 0.85rem;
+        color: #34C759;
+        margin-top: 0.25rem;
+    }
+    
+    .status-dot {
+        width: 8px;
+        height: 8px;
+        background: #34C759;
+        border-radius: 50%;
+        animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.4; }
+    }
 </style>
 """, unsafe_allow_html=True)
 
 # -------------------------------
-# 제목
+# 헤더
 # -------------------------------
-st.title("특허 질의응답 시스템")
-st.caption("청킹 전략 기반 · 다중 특허 문서 참조 QA")
+st.markdown("""
+<div class="chat-header">
+    <div class="chat-title"> 특허 질의응답 시스템</div>
+    <div class="chat-subtitle">청킹 전략 기반 · 다중 특허 문서 참조 QA</div>
+    <div class="status-indicator">
+        <span class="status-dot"></span>
+        <span>온라인</span>
+    </div>
+</div>
+""", unsafe_allow_html=True)
 
 # -------------------------------
 # 챗봇 로딩 (1회)
@@ -75,50 +258,99 @@ chatbot = load_chatbot()
 # 세션 상태 초기화
 # -------------------------------
 if "messages" not in st.session_state:
-    st.session_state.messages = []
+    st.session_state.messages = [{
+        "role": "assistant",
+        "content": "안녕하세요! 특허 QA 시스템입니다. 특허에 관한 질문을 자유롭게 입력해주세요.",
+        "timestamp": datetime.now().strftime("%H:%M")
+    }]
 
 # -------------------------------
-# 기존 대화 출력 (위)
+# 기존 대화 출력 (iMessage 스타일)
 # -------------------------------
 for msg in st.session_state.messages:
-    with st.chat_message(msg["role"]):
-        st.markdown(msg["content"])
-        if msg["role"] == "assistant" and "patents" in msg:
-            st.markdown(
-                f"<div class='meta'>참조 출원번호: {', '.join(msg['patents'])}</div>",
-                unsafe_allow_html=True
-            )
+    if msg["role"] == "user":
+        # 사용자 메시지 (우측 파란 말풍선)
+        st.markdown(f"""
+        <div class="user-message-wrapper">
+            <div>
+                <div class="user-message">{msg["content"]}</div>
+                <div class="message-time user-time">{msg.get('timestamp', '')}</div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+    else:
+        # 어시스턴트 메시지 (좌측 흰 말풍선)
+        meta_html = ""
+        if "patents" in msg and msg["patents"]:
+            patents_str = ", ".join(msg["patents"])
+            meta_html = f'<div class="patent-meta">📋 참조 출원번호: {patents_str}</div>'
+        
+        st.markdown(f"""
+        <div class="assistant-message-wrapper">
+            <div>
+                <div class="assistant-message">{msg["content"]}</div>
+                {meta_html}
+                <div class="message-time assistant-time">{msg.get('timestamp', '')}</div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
 
 # -------------------------------
 # 질문 입력 (항상 맨 아래)
 # -------------------------------
-user_input = st.chat_input("질문을 입력하세요 (예: 이 기술의 주요 장점은 무엇인가요?)")
+user_input = st.chat_input("메시지를 입력하세요...")
 
 if user_input:
+    # 타임스탬프
+    timestamp = datetime.now().strftime("%H:%M")
+    
     # 사용자 질문 저장
     st.session_state.messages.append({
         "role": "user",
-        "content": user_input
+        "content": user_input,
+        "timestamp": timestamp
     })
-
+    
     # 답변 생성
-    with st.spinner("🤖 답변 생성 중..."):
+    with st.spinner("💭 답변 생성 중..."):
         result = chatbot.ask(user_input, verbose=False, max_patents=3)
-
+    
     # 챗봇 답변 저장
     st.session_state.messages.append({
         "role": "assistant",
         "content": result["answer"],
-        "patents": result["application_numbers"]
+        "patents": result["application_numbers"],
+        "timestamp": datetime.now().strftime("%H:%M")
     })
-
-    # 즉시 화면 갱신 (입력창 비우기)
+    
+    # 즉시 화면 갱신
     st.rerun()
 
 # -------------------------------
-# 요약 정보
+# 요약 정보 (하단)
 # -------------------------------
-if st.session_state.messages:
-    st.divider()
-    st.subheader("📊 응답 요약")
-    st.write(f"총 질문 수: {len([m for m in st.session_state.messages if m['role']=='user'])}")
+if len(st.session_state.messages) > 1:  # 초기 메시지 제외
+    st.markdown("<hr>", unsafe_allow_html=True)
+    
+    user_messages = [m for m in st.session_state.messages if m['role'] == 'user']
+    
+    st.markdown(f"""
+    <div class="summary-box">
+        <h4 style="margin: 0 0 0.5rem 0; color: #1a1a1a;">📊 대화 요약</h4>
+        <p style="margin: 0; color: #86868b; font-size: 0.9rem;">
+            총 질문 수: <strong>{len(user_messages)}개</strong>
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+
+# 사이드바 - 대화 초기화
+with st.sidebar:
+    st.markdown("### ⚙️ 설정")
+    
+    if st.button("🗑️ 대화 내역 초기화", use_container_width=True):
+        st.session_state.messages = [{
+            "role": "assistant",
+            "content": "안녕하세요! 특허 QA 시스템입니다. 특허에 관한 질문을 자유롭게 입력해주세요.",
+            "timestamp": datetime.now().strftime("%H:%M")
+        }]
+        st.rerun()
