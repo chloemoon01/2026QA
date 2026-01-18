@@ -58,22 +58,29 @@ st.markdown("""
         margin: -2rem -1rem 1.5rem -1rem;
         border-radius: 0;
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        position: sticky;
+        top: 0;
+        z-index: 999;
     }
     
     .chat-title {
-        font-size: 1.5rem;
+        font-size: 1.3rem;
         font-weight: 600;
         color: #1a1a1a;
         margin: 0;
         display: flex;
         align-items: center;
         gap: 0.5rem;
+        white-space: nowrap;
+        overflow: visible;
     }
     
     .chat-subtitle {
-        font-size: 0.85rem;
+        font-size: 0.8rem;
         color: #86868b;
         margin-top: 0.25rem;
+        white-space: normal;
+        word-break: keep-all;
     }
     
     /* 채팅 메시지 컨테이너 */
@@ -112,18 +119,40 @@ st.markdown("""
     .assistant-message-wrapper {
         display: flex;
         justify-content: flex-start;
+        align-items: flex-start;
         margin: 0.5rem 0;
+        gap: 0.5rem;
+    }
+    
+    .bot-avatar {
+        width: 32px;
+        height: 32px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        margin-top: 0.25rem;
+        box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+    }
+    
+    .bot-avatar svg {
+        width: 18px;
+        height: 18px;
+        color: white;
     }
     
     .assistant-message {
-        background: white;
+        background: #ffffff;
         color: #1a1a1a;
         padding: 0.75rem 1rem;
         border-radius: 18px;
         border-bottom-left-radius: 4px;
-        max-width: 75%;
+        max-width: 70%;
         word-wrap: break-word;
-        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+        border: 1px solid rgba(0, 0, 0, 0.06);
         font-size: 0.95rem;
         line-height: 1.5;
     }
@@ -236,7 +265,7 @@ st.markdown("""
 # -------------------------------
 st.markdown("""
 <div class="chat-header">
-    <div class="chat-title"> 특허 질의응답 시스템</div>
+    <div class="chat-title">💬 특허 질의응답 시스템</div>
     <div class="chat-subtitle">청킹 전략 기반 · 다중 특허 문서 참조 QA</div>
     <div class="status-indicator">
         <span class="status-dot"></span>
@@ -279,7 +308,7 @@ for msg in st.session_state.messages:
         </div>
         """, unsafe_allow_html=True)
     else:
-        # 어시스턴트 메시지 (좌측 흰 말풍선)
+        # 어시스턴트 메시지 (좌측 흰 말풍선 + 로봇 아이콘)
         meta_html = ""
         if "patents" in msg and msg["patents"]:
             patents_str = ", ".join(msg["patents"])
@@ -287,6 +316,15 @@ for msg in st.session_state.messages:
         
         st.markdown(f"""
         <div class="assistant-message-wrapper">
+            <div class="bot-avatar">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="11" width="18" height="10" rx="2"/>
+                    <circle cx="12" cy="5" r="2"/>
+                    <path d="M12 7v4"/>
+                    <line x1="8" y1="16" x2="8" y2="16"/>
+                    <line x1="16" y1="16" x2="16" y2="16"/>
+                </svg>
+            </div>
             <div>
                 <div class="assistant-message">{msg["content"]}</div>
                 {meta_html}
