@@ -2,6 +2,20 @@ import streamlit as st
 import json
 from patent_qa import PatentQAChatbot  # 기존 코드 파일명 기준
 from datetime import datetime
+import os
+import requests
+
+JSON_URL = "https://drive.google.com/file/d/1rlB_4MrzZLFXrwHgPbOQge7bDdinwyKl/view?usp=drive_link"
+JSON_PATH = "final_patent_chunking_results.json"
+
+def download_json():
+    if not os.path.exists(JSON_PATH):
+        st.info("📥 특허 데이터 로딩 중입니다. 잠시만 기다려주세요...")
+        r = requests.get(JSON_URL)
+        with open(JSON_PATH, "wb") as f:
+            f.write(r.content)
+
+download_json()
 
 # -------------------------------
 # 페이지 설정
@@ -114,3 +128,4 @@ st.markdown('</div>', unsafe_allow_html=True)
 if st.session_state.chat_history:
     st.subheader("📊 응답 정보 요약")
     st.write(f"총 질문 수: {len(st.session_state.chat_history)}")
+
