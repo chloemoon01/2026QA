@@ -43,9 +43,14 @@ st.markdown("""
     
     /* Streamlit 기본 패딩 제거 */
     .block-container {
-        padding-top: 2rem !important;
+        padding-top: 5rem !important;
         padding-bottom: 1rem !important;
         max-width: 900px !important;
+    }
+    
+    /* Streamlit 기본 요소 숨기기 */
+    header {
+        visibility: hidden;
     }
     
     /* 헤더 영역 */
@@ -55,12 +60,12 @@ st.markdown("""
         -webkit-backdrop-filter: blur(20px);
         border-bottom: 1px solid rgba(0, 0, 0, 0.08);
         padding: 1rem 1.5rem;
-        margin: -2rem -1rem 1.5rem -1rem;
-        border-radius: 0;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-        position: sticky;
+        position: fixed;
         top: 0;
-        z-index: 999;
+        left: 0;
+        right: 0;
+        z-index: 9999;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
     }
     
     .chat-title {
@@ -127,14 +132,14 @@ st.markdown("""
     .bot-avatar {
         width: 32px;
         height: 32px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #a0aec0 0%, #718096 100%);
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
         flex-shrink: 0;
         margin-top: 0.25rem;
-        box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+        box-shadow: 0 2px 8px rgba(113, 128, 150, 0.25);
     }
     
     .bot-avatar svg {
@@ -303,7 +308,6 @@ for msg in st.session_state.messages:
         <div class="user-message-wrapper">
             <div>
                 <div class="user-message">{msg["content"]}</div>
-                <div class="message-time user-time">{msg.get('timestamp', '')}</div>
             </div>
         </div>
         """, unsafe_allow_html=True)
@@ -328,7 +332,6 @@ for msg in st.session_state.messages:
             <div>
                 <div class="assistant-message">{msg["content"]}</div>
                 {meta_html}
-                <div class="message-time assistant-time">{msg.get('timestamp', '')}</div>
             </div>
         </div>
         """, unsafe_allow_html=True)
