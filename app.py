@@ -25,7 +25,7 @@ download_json()
 # 페이지 설정
 # -------------------------------
 st.set_page_config(
-    page_title="Patent QA Chatbot",
+    page_title="특허 질의응답 시스템",
     page_icon="💬",
     layout="wide"
 )
@@ -41,60 +41,26 @@ st.markdown("""
         padding: 0 !important;
     }
     
-    /* Streamlit 기본 패딩 제거 */
+    /* Streamlit 기본 패딩 조정 */
     .block-container {
-        padding-top: 6rem !important;
+        padding-top: 2rem !important;
         padding-bottom: 1rem !important;
         max-width: 900px !important;
     }
     
-    /* Streamlit 기본 요소 숨기기 */
-    header[data-testid="stHeader"] {
-        display: none;
+    /* 제목 스타일 */
+    h1 {
+        color: #1a1a1a !important;
+        font-size: 1.8rem !important;
+        margin-bottom: 0.5rem !important;
     }
     
-    #MainMenu {
-        visibility: hidden;
+    .stCaption {
+        color: #86868b !important;
+        font-size: 0.9rem !important;
     }
     
-    footer {
-        visibility: hidden;
-    }
-    
-    /* 헤더 영역 */
-    .chat-header {
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-        border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-        padding: 1rem 1.5rem;
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        z-index: 9999;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-    }
-    
-    .chat-title {
-        font-size: 1.3rem;
-        font-weight: 600;
-        color: #1a1a1a;
-        margin: 0;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        white-space: nowrap;
-        overflow: visible;
-    }
-    
-    .chat-subtitle {
-        font-size: 0.8rem;
-        color: #86868b;
-        margin-top: 0.25rem;
-        white-space: normal;
-        word-break: keep-all;
-    }
+    /* 헤더 영역 제거 */
     
     /* 채팅 메시지 컨테이너 */
     .stChatMessage {
@@ -248,47 +214,9 @@ st.markdown("""
         display: none !important;
     }
     
-    /* 상태 표시 */
-    .status-indicator {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.4rem;
-        font-size: 0.85rem;
-        color: #34C759;
-        margin-top: 0.25rem;
-    }
-    
-    .status-dot {
-        width: 8px;
-        height: 8px;
-        background: #34C759;
-        border-radius: 50%;
-        animation: pulse 2s infinite;
-    }
-    
-    @keyframes pulse {
-        0%, 100% { opacity: 1; }
-        50% { opacity: 0.4; }
-    }
+    /* 상태 표시 제거 */
 </style>
 """, unsafe_allow_html=True)
-
-# -------------------------------
-# 헤더 (HTML로 직접 삽입)
-# -------------------------------
-st.markdown("""
-<div class="chat-header">
-    <div class="chat-title">💬 특허 질의응답 시스템</div>
-    <div class="chat-subtitle">청킹 전략 기반 · 다중 특허 문서 참조 QA</div>
-    <div class="status-indicator">
-        <span class="status-dot"></span>
-        <span>온라인</span>
-    </div>
-</div>
-""", unsafe_allow_html=True)
-
-# 헤더 공간 확보
-st.markdown("<div style='height: 5rem;'></div>", unsafe_allow_html=True)
 
 # -------------------------------
 # 챗봇 로딩 (1회)
@@ -298,6 +226,13 @@ def load_chatbot():
     return PatentQAChatbot(JSON_PATH)
 
 chatbot = load_chatbot()
+
+# -------------------------------
+# 제목 표시 (Streamlit 방식)
+# -------------------------------
+st.title("💬 특허 질의응답 시스템")
+st.caption("청킹 전략 기반 · 다중 특허 문서 참조 QA")
+st.markdown("---")
 
 # -------------------------------
 # 세션 상태 초기화
