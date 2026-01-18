@@ -1,4 +1,28 @@
-import streamlit as st
+/* 코드 복사 버튼 숨기기 */
+    button[title="Copy to clipboard"] {
+        display: none !important;
+    }
+    
+    .stCodeBlock {
+        display: none !important;
+    }
+    
+    /* Streamlit 기본 요소 숨기기 */
+    .stDeployButton {
+        display: none !important;
+    }
+    
+    #MainMenu {
+        visibility: hidden !important;
+    }
+    
+    footer {
+        visibility: hidden !important;
+    }
+    
+    .viewerBadge_container__1QSob {
+        display: none !important;
+    }import streamlit as st
 import json
 from patent_qa import PatentQAChatbot
 from datetime import datetime
@@ -112,8 +136,8 @@ st.markdown("""
         align-items: center;
         justify-content: center;
         flex-shrink: 0;
-        margin-top: 0.25rem;
         box-shadow: 0 2px 8px rgba(113, 128, 150, 0.25);
+        margin-top: 0.5rem;
     }
     
     .bot-avatar svg {
@@ -251,38 +275,43 @@ if len(st.session_state.messages) == 0:
 # -------------------------------
 # 기존 대화 출력 (iMessage 스타일)
 # -------------------------------
-for msg in st.session_state.messages:
-    if msg["role"] == "user":
-        # 사용자 메시지 (우측 파란 말풍선)
-        st.markdown(f"""
-        <div class="user-message-wrapper">
-            <div class="user-message">{msg["content"]}</div>
-        </div>
-        """, unsafe_allow_html=True)
-    else:
-        # 어시스턴트 메시지 (좌측 흰 말풍선 + 로봇 아이콘)
-        meta_html = ""
-        if "patents" in msg and msg["patents"]:
-            patents_str = ", ".join(msg["patents"])
-            meta_html = f'<div class="patent-meta">📋 참조 출원번호: {patents_str}</div>'
-        
-        st.markdown(f"""
-        <div class="assistant-message-wrapper">
-            <div class="bot-avatar">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="3" y="11" width="18" height="10" rx="2"/>
-                    <circle cx="12" cy="5" r="2"/>
-                    <path d="M12 7v4"/>
-                    <line x1="8" y1="16" x2="8" y2="16"/>
-                    <line x1="16" y1="16" x2="16" y2="16"/>
-                </svg>
+chat_container = st.container()
+
+with chat_container:
+    for i, msg in enumerate(st.session_state.messages):
+        if msg["role"] == "user":
+            # 사용자 메시지 (우측 파란 말풍선)
+            st.markdown(f"""
+            <div class="user-message-wrapper">
+                <div class="user-message">{msg["content"]}</div>
             </div>
-            <div style="flex: 1;">
-                <div class="assistant-message">{msg["content"]}</div>
-                {meta_html}
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
+            """, unsafe_allow_html=True)
+        else:
+            # 어시스턴트 메시지 (컴포넌트 방식으로 변경)
+            col1, col2 = st.columns([0.05, 0.95])
+            
+            with col1:
+                # 로봇 아이콘
+                st.markdown("""
+                <div class="bot-avatar">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="11" width="18" height="10" rx="2"/>
+                        <circle cx="12" cy="5" r="2"/>
+                        <path d="M12 7v4"/>
+                        <line x1="8" y1="16" x2="8" y2="16"/>
+                        <line x1="16" y1="16" x2="16" y2="16"/>
+                    </svg>
+                </div>
+                """, unsafe_allow_html=True)
+            
+            with col2:
+                # 메시지 내용 (일반 텍스트로)
+                st.markdown(f'<div class="assistant-message">{msg["content"]}</div>', unsafe_allow_html=True)
+                
+                # 참조 특허 정보
+                if "patents" in msg and msg["patents"]:
+                    patents_str = ", ".join(msg["patents"])
+                    st.markdown(f'<div class="patent-meta">📋 참조 출원번호: {patents_str}</div>', unsafe_allow_html=True)
 
 # -------------------------------
 # 질문 입력 (항상 맨 아래)
