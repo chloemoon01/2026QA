@@ -1,7 +1,7 @@
 streamlit
-numpy
+openai
 scikit-learn
+numpy
 torch
 transformers
 sentence-transformers
-openai
