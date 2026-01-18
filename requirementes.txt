@@ -2,6 +2,4 @@ streamlit
 openai
 scikit-learn
 numpy
-torch
-transformers
-sentence-transformers
+pandas
