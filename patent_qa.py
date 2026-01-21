@@ -189,7 +189,7 @@ class PatentQAChatbot:
 - 마치 하나의 완전한 문서를 읽고 답변하는 것처럼 자연스럽게 작성하세요
 - 여러 출처의 내용을 매끄럽게 통합하여 전문가 답변으로 제시하세요
 - 반복되는 내용은 한 번만 언급하고, 상충되는 정보가 있다면 통합적으로 설명하세요
-- 답변 추출 정보에 각주를 달아 출처를 하단에 함께 제시하세요
+- 출처나 출원번호 정보는 포함하지 마세요
 
 질문: {question}
 
@@ -210,18 +210,12 @@ class PatentQAChatbot:
             )
             
             synthesized_answer = response.choices[0].message.content.strip()
-
             
-            # 참조한 출원번호들 표시(1/21 삭제)
-            #patent_ids = list(patent_answers.keys())
-            #patent_refs = "', '".join(patent_ids)
-            
-            #return f"{synthesized_answer}\n\n※ 해당 답변은 출원번호 '{patent_refs}'를 참조하여 작성되었습니다."
+            # 각주 제거 - 답변만 반환
+            return synthesized_answer
             
         except Exception as e:
-            patent_ids = list(patent_answers.keys())
-            patent_refs = "', '".join(patent_ids)
-            return f"답변 종합 중 오류: {e}\n\n※ 참조 출원번호: '{patent_refs}'"
+            return f"답변 종합 중 오류: {e}"
     
     def ask(self, question: str, verbose: bool = True, max_patents: int = 3) -> dict:
         """
@@ -375,29 +369,3 @@ class PatentQAChatbot:
             print(f"\n❌ 결과 저장 실패: {e}")
         
         return results
-
-        # 사용 예시
-if __name__ == "__main__":
-    # 챗봇 초기화 (JSON 파일 사용)
-    chatbot = PatentQAChatbot("/content/[final]patent_chunking_results.json")
-    
-    # === 방법 1: 대화형 모드 (추천!) ===
-    chatbot.chat()
-    
-    # === 방법 2: 단일 질문 (최대 3개 특허 참조) ===
-    # result = chatbot.ask("이 기술의 주요 장점은 무엇인가요?", max_patents=3)
-    # print(result['answer'])
-    
-    # === 방법 3: 배치 처리 ===
-    # questions = [
-    #     "이 기술의 주요 장점은 무엇인가요?",
-    #     "어떤 문제를 해결하기 위해 개발되었나요?",
-    #     "기존 기술과 비교했을 때 차별점은 무엇인가요?",
-    #     "이 기술의 적용 분야는 어디인가요?"
-    # ]
-    # results = chatbot.batch_process(questions, max_patents=3)
-    
-
-
-
-
