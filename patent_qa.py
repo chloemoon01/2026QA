@@ -211,18 +211,17 @@ class PatentQAChatbot:
             
             synthesized_answer = response.choices[0].message.content.strip()
 
-            '''
-            # 참조한 출원번호들 표시(1/21 삭제)
-            patent_ids = list(patent_answers.keys())
-            patent_refs = "', '".join(patent_ids)
             
-            return f"{synthesized_answer}\n\n※ 해당 답변은 출원번호 '{patent_refs}'를 참조하여 작성되었습니다."
+            # 참조한 출원번호들 표시(1/21 삭제)
+            #patent_ids = list(patent_answers.keys())
+            #patent_refs = "', '".join(patent_ids)
+            
+            #return f"{synthesized_answer}\n\n※ 해당 답변은 출원번호 '{patent_refs}'를 참조하여 작성되었습니다."
             
         except Exception as e:
             patent_ids = list(patent_answers.keys())
             patent_refs = "', '".join(patent_ids)
             return f"답변 종합 중 오류: {e}\n\n※ 참조 출원번호: '{patent_refs}'"
-            '''
     
     def ask(self, question: str, verbose: bool = True, max_patents: int = 3) -> dict:
         """
@@ -398,6 +397,7 @@ if __name__ == "__main__":
     # ]
     # results = chatbot.batch_process(questions, max_patents=3)
     
+
 
 
 
