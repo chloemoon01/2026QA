@@ -102,17 +102,17 @@ st.markdown("""
         font-size: 0.95rem;
         line-height: 1.5;
         word-wrap: break-word;
-        margin-bottom: 0.5rem;
     }
     
-    .patent-meta {
-        font-size: 0.8rem;
-        color: #86868b;
-        background: rgba(0, 0, 0, 0.03);
-        padding: 0.5rem 0.75rem;
-        border-radius: 12px;
-        margin-top: 0.5rem;
-        border-left: 3px solid #007AFF;
+    .patent-meta-inline {
+        font-size: 0.75rem;
+        color: #007AFF;
+        background: rgba(0, 122, 255, 0.08);
+        padding: 0.35rem 0.6rem;
+        border-radius: 8px;
+        margin-top: 0.75rem;
+        display: inline-block;
+        border: 1px solid rgba(0, 122, 255, 0.2);
     }
     
     .stChatInputContainer {
@@ -186,17 +186,16 @@ for msg in st.session_state.messages:
             """, unsafe_allow_html=True)
         
         with col2:
-            st.markdown(
-                f'<div class="assistant-message">{msg["content"]}</div>',
-                unsafe_allow_html=True
-            )
-            
+            # 답변 내용과 참조 출원번호를 말풍선 안에 함께 표시
+            patent_html = ""
             if "patents" in msg and msg["patents"]:
                 patents_str = ", ".join(msg["patents"])
-                st.markdown(
-                    f'<div class="patent-meta">📋 참조 출원번호: {patents_str}</div>',
-                    unsafe_allow_html=True
-                )
+                patent_html = f'<div class="patent-meta-inline">📋 {patents_str}</div>'
+            
+            st.markdown(
+                f'<div class="assistant-message">{msg["content"]}{patent_html}</div>',
+                unsafe_allow_html=True
+            )
 
 # -------------------------------
 # 질문 입력
@@ -204,20 +203,33 @@ for msg in st.session_state.messages:
 user_input = st.chat_input("메시지를 입력하세요...")
 
 if user_input:
+    # 1. 사용자 질문 먼저 추가
     st.session_state.messages.append({
         "role": "user",
         "content": user_input
     })
     
-    with st.spinner("💭 답변 생성 중..."):
-        result = chatbot.ask(user_input, verbose=False, max_patents=3)
+    # 2. 화면 즉시 갱신 (질문 표시)
+    st.rerun()
+
+# 답변 생성 체크 (마지막 메시지가 user이고 답변이 없는 경우)
+if (len(st.session_state.messages) > 0 and 
+    st.session_state.messages[-1]["role"] == "user"):
     
+    last_question = st.session_state.messages[-1]["content"]
+    
+    # 로딩 표시
+    with st.spinner("💭 답변 생성 중..."):
+        result = chatbot.ask(last_question, verbose=False, max_patents=3)
+    
+    # 답변 추가
     st.session_state.messages.append({
         "role": "assistant",
         "content": result["answer"],
         "patents": result["application_numbers"]
     })
     
+    # 답변 후 화면 갱신
     st.rerun()
 
 # -------------------------------
